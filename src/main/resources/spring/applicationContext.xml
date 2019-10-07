@@ -144,4 +144,7 @@
 
     <!-- 异常统一处理 -->
      <bean id="exceptionResolver" class="com.heshan.exception.HandlerException"/>
+
+    <!--ssm 集成redis,引入Redis配置文件，一定需要  -->
+    <import resource="classpath:springredis/springredis.xml"/>
 </beans>

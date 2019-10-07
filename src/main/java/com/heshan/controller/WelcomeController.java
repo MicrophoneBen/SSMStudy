@@ -10,9 +10,14 @@ import org.springframework.web.bind.annotation.RequestMapping;
  */
 @Controller
 public class WelcomeController {
+
+
     //打开首页
     @RequestMapping("/")
     public String pageIndex() {
         return "index";
     }
+
+
+
 }
