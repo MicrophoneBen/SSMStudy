@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:aop="http://www.springframework.org/schema/aop"
+       xmlns:mvc="http://www.springframework.org/schema/mvc"
+       xmlns:task="http://www.springframework.org/schema/task"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+        http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd
+          http://www.springframework.org/schema/mvc http://www.springframework.org/schema/mvc/spring-mvc.xsd
+          http://www.springframework.org/schema/task http://www.springframework.org/schema/task/spring-task.xsd"
+       default-autowire="byType" default-lazy-init="true">
+    <context:annotation-config/>
+
+<!-- 只需要扫描包中的 Controller 注解 -->
+	<context:component-scan base-package="com.heshan.controller">
+	<context:include-filter type="annotation"
+		expression="org.springframework.stereotype.Controller" />
+	</context:component-scan>
+
+	<!-- 启动 mvc 注解驱动 -->
+	<mvc:annotation-driven />
+
+	<!-- 启动定时任务 -->
+    <task:annotation-driven/>
+
+	<!-- 静态资源处理 -->
+	<mvc:default-servlet-handler/>
+
+    <!-- aspectj aop启用CGliB代理 -->
+    <!--<aop:aspectj-autoproxy expose-proxy="true" proxy-target-class="true"/>-->
+
+	<!-- 配置视图解析器 -->
+    <bean class="org.springframework.web.servlet.view.InternalResourceViewResolver">
+        <!-- 页面模板的前缀是什么 -->
+        <property name="prefix" value="/WEB-INF/views/" />
+        <!-- 页面模板的后缀是什么 -->
+        <property name="suffix" value=".jsp" />
+    </bean>
+
+    <!-- 静态资源访问 -->
+    <mvc:resources location="classpath*:/static/" mapping="/static/**"/>
+
+    <!-- hibernate-Validator Controller，Service参数检验-->
+    <!--
+    <bean id="validator" class="org.springframework.validation.beanvalidation.LocalValidatorFactoryBean">
+        <property name="providerClass" value="org.hibernate.validator.HibernateValidator"/>
+    </bean>
+    -->
+    <bean class="org.springframework.validation.beanvalidation.MethodValidationPostProcessor"/>
+
+    <!-- json转换器 -->
+    <bean class="org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter" >
+        <property name="cacheSeconds" value="0" />
+        <!-- 配置一下对json数据的转换 -->
+        <property name="messageConverters">
+        <list>
+            <bean class="org.springframework.http.converter.ByteArrayHttpMessageConverter"/>
+            <ref bean="mappingGson2HttpMessageConverter" />
+            </list>
+        </property>
+    </bean>
+    <bean id="mappingGson2HttpMessageConverter" class="org.springframework.http.converter.json.MappingJackson2HttpMessageConverter">
+        <!-- 处理返回的json数据的编码，默认是ISO-88859-1的，这里我们把它设置为UTF-8,如果有乱码的情况，我们只需要修改这里就可以了 -->
+     <!--        <property name="supportedMediaTypes"> 
+                 <list> 
+                    <value>text/html;charset=UTF-8</value> 
+                 </list> 
+             </property> -->
+    </bean>
+
+    <!-- 文件上传 -->
+	<bean id="multipartResolver"
+		class="org.springframework.web.multipart.commons.CommonsMultipartResolver">
+		<!-- 上传文件大小限制 -->
+		<property name="maxUploadSize">
+            <value>10485760</value>
+        </property>
+        <!-- 请求的编码格式, 和 jsp 页面一致 -->
+        <property name="defaultEncoding">
+            <value>UTF-8</value>
+        </property>
+	</bean>
+
+	<!--&lt;!&ndash; 后台访问拦截器&ndash;&gt;
+    <mvc:interceptors>
+        <mvc:interceptor>
+            <mvc:mapping path="/**"/>
+            <mvc:exclude-mapping path="/system/login"/>
+            <mvc:exclude-mapping path="/system/get_cpacha"/>
+            <mvc:exclude-mapping path="/h-ui/**"/>
+            <mvc:exclude-mapping path="/easyui/**"/>
+            <bean class="com.ischoolbar.programmer.interceptor.LoginInterceptor"></bean>
+        </mvc:interceptor>
+    </mvc:interceptors>-->
+
+    <!-- 支持Shiro对Controller的方法级AOP安全控制 begin -->
+    <!-- 开启aop对类代理 -->
+ <!--
+    <bean class="org.springframework.aop.framework.autoproxy.DefaultAdvisorAutoProxyCreator" depends-on="lifecycleBeanPostProcessor" >
+        <property name="proxyTargetClass" value="true" />
+    </bean>
+
+    <bean id="securityManager" class="org.apache.shiro.web.mgt.DefaultWebSecurityManager">
+        <property name="cacheManager" ref="-cache-manager"/>
+        <property name="realm" ref="your-realm"/>
+    </bean>
+    -->
+    <!-- 让注解式授权生效 -->
+ <!--
+    <bean class="org.apache.shiro.spring.security.interceptor.AuthorizationAttributeSourceAdvisor">
+        <property name="securityManager" ref="securityManager" />
+    </bean>
+-->
+    <!-- 定义需要特殊处理的异常，用类名或完全路径名作为key，异常页名作为值 -->
+    <!-- shiro 权限异常处理 -->
+<!--
+    <bean class="org.springframework.web.servlet.handler.SimpleMappingExceptionResolver">
+        <property name="exceptionMappings">
+            <props>
+                &lt;!&ndash; 可能会出现的异常以及出现异常跳转的页面 &ndash;&gt;
+                <prop key="org.apache.shiro.authz.UnauthorizedException">
+                    redirect:/unAuth
+                </prop>
+            </props>
+        </property>
+    </bean>
+    -->
+    <!-- 支持Shiro对Controller的方法级AOP安全控制 end-->
+</beans>
